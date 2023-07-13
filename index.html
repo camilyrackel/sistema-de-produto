@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de produtos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar bg-primary">
+        <div class="container-fluid">
+            <h1>Organizador de produtos</h1>
+        </div>
+    </nav>
+
+    <div id="container">
+        <div class="m-3 d-flex align-items-center ">
+            <label for="search" class="form-label">Buscar:</label>
+            <input type="search" class="form-control" id="search" onkeyup="buscarDados()">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+            style="border-radius: 50%;"><i class="bi bi-plus-lg"></i></button>
+        </div>
+        <div>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                        <th>Descrição</th>
+                        <th>Editar</th>
+                        <th>Excluir</th>
+                    </tr>
+                </thead>
+                <tbody id="dadosProdutos">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+<!--Modal-->
+ <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Cadastrar</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <div class="d-flex align-items-center">
+                <label for="inputNome" class="form-label">Nome:</label>
+                <input type="text" class="form-control" id="inputNome">
+            </div>
+            <div class="d-flex align-items-center">
+                <label for="inputTelefone" class="form-label">Categoria:</label>
+                <input type="text" class="form-control" id="inputCategoria">
+            </div>
+            <div clas="d-flex align-items-center">
+                <label for="inputPreco">Valor:</label>
+                <input type="number" class="form-control" id="inputPreco">
+            </div>
+            <div class="d-flex align-items-center">
+                <label for="inputDescricao">Descrição:</label>
+                <input type="text" class="form-control" id="inputDescricao">
+            </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="cadastrar()">Salvar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal Remover Dados-->
+    <div class="modal fade" id="modalRemover" tabindex="-1" aria-labelledby="modalRemover" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-x-octagon-fill text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center">
+                        <p class="h4">Deseja realmente remover esse item?</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="remover">Remover</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar-->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editModalLabel">Editar</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center">
+                        <label for="editNome" class="form-label">Nome:</label>
+                        <input type="text" class="form-control" id="editNome">
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <label for="editCategoria" class="form-label">Categoria:</label>
+                        <input type="text" class="form-control" id="editCategoria">
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <label for="editPreco">Valor:</label>
+                        <input type="number" class="form-control" id="editPreco">
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <label for="editDescricao">Descrição:</label>
+                        <input type="text" class="form-control" id="editDescricao">
+                    </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="editar">Editar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const baseUrl = "https://649a1d4a79fbe9bcf8404b5a.mockapi.io/users/20201214010008/products"
+        getDados();
+        async function cadastrar() {
+          const inputNome = document.querySelector("#inputNome");
+          const inputTelefone = document.querySelector("#inputTelefone");
+          const dados = {
+            nome: inputNome.value,
+            categoria: inputcategoria.value,
+            Valor: inputValor.value,
+            Descrição: inputDescricao.value,                       
+            Editar: inputEditar.value,
+            Excluir: inputExcluir.value
+          }
+    
+          try {
+            await fetch(baseUrl + "/contato", {
+              method: "POST",
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(dados)
+            });
+    
+          } catch (error) {
+            alert("Ocorreu um erro")
+            console.log(error)
+          }
+    
+          //Limpar dados
+          inputNome.value = "";
+          inputcategoria.value = "";
+          inputValor.value = " ";
+          inputDescricao.value = "";
+          inputEditar.value = " ";
+          inputExcluir.value = " ";
+
+          //Fechar janela
+          const m = document.querySelector("#exampleModal");
+          const modal = bootstrap.Modal.getInstance(m);
+          modal.hide();
+          exibirDados();
+        }
+    
+        async function exibirDados(agenda) {
+          const tbody = document.querySelector("#dadosAgenda");
+    
+    
+    
+          let linhas = "";
+          agenda.forEach((dado, index) => {
+            linhas += `<tr>
+                <td>${index + 1}</td>
+                <td>${dado.nome}</td>
+                <td>${dado.categoria}</td>
+                <td>${dado.Valor}</td>
+                <td>${dado.Descricao}</td>
+                <td>${dado.Editar}</td>
+                <td>${dado.Excluir}</td>
+                <td><i class="bi bi-pencil-square" style="cursor: pointer" onclick="editarDados(${dado.id})"></i></td>
+                <td><i class="bi bi-trash" style="cursor: pointer" onclick="removerDados(${dado.id})"></i></td>
+              </tr>`;
+          });
+    
+          if (linhas == "") {
+            linhas = `
+              <tr>
+                <td colspan="5" style="text-align:center">Não há dados cadastrados</td>
+              </tr>
+            `;
+          }
+    
+          tbody.innerHTML = linhas;
+    
+    
+    
+        }
+    
+        async function getDados() {
+          try {
+    
+            const response = await fetch(baseUrl + "/contato");
+            const data = await response.json();
+            exibirDados(data);
+          } catch (error) {
+            alert("Ocorreu um erro")
+            console.log(error)
+          }
+        }
+        async function buscarDados() {
+          const filtro = document.querySelector("#search");
+    
+          try {
+            if (filtro.value == "")
+              getDados();
+            else {
+              const response = await fetch(baseUrl + "/contato/?nome=" + filtro.value);
+              const data = await response.json();
+              exibirDados(data);
+            }
+    
+          } catch (error) {
+            alert("Ocorreu um erro")
+            console.log(error)
+          }
+    
+        }
+    
+        async function removerDados(index) {
+          const modalRemover = new bootstrap.Modal('#modalRemover');
+          modalRemover.show();
+          const btnRemover = document.querySelector("#remover");
+          btnRemover.addEventListener("click", async () => {
+            try {
+              await fetch(baseUrl + "/contato/" + index, { method: "DELETE" });
+              modalRemover.hide();
+              exibirDados(sistema_de_produtos);
+            } catch (error) {
+              alert("Ocorreu um erro")
+              console.log(error)
+            }
+    
+    
+          });
+        }
+    
+        async function editarDados(index) {
+          const editNome = document.querySelector("#editNome");
+          const editCategoria = document.querySelector("#editCategoria");
+          const editValor = document.querySelector("#editValor");
+          const editDescricao = document.querySelector("#editDescricao");
+          const editEditar = document.querySelector("#editEditar");
+          const editExcluir = document.querySelector("#editExcluir");
+          
+          try {
+            const response = await fetch(baseUrl + "/contato/" + index);
+            const data = await response.json();
+            editNome.value = data.nome;
+            editCategoria.value = data.categoria;
+            editValor.value = data.Valor;
+            editDescricao.value = data.Descricao;
+            editEditar.value = data.Editar;
+            editExcluir.value = data.Excluir;
+          } catch (error) {
+            alert("Ocorreu um erro")
+            console.log(error)
+          }
+    
+          const modalEditar = new bootstrap.Modal('#editModal');
+          modalEditar.show();
+          const editar = document.querySelector("#editar");
+          editar.addEventListener("click", async () => {
+            const dado = {
+              nome: editNome.value,
+              categoria: editCategoria.value,
+              Valor: value = editValor.value,
+              Descricao: value = editDescricao,
+              Editar: value = editEditar,
+              Excluir: value = editExcluir,
+            };
+            try {
+              const response = await fetch(baseUrl + "/contato/" + index, {
+                method: "PUT",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dado)
+              });
+              exibirDados();
+              modalEditar.hide();
+            } catch (error) {
+              alert("Ocorreu um erro")
+              console.log(error)
+            }
+    
+          })
+        }
+        const handlePhone = (event) => {
+          let input = event.target
+          input.value = phoneMask(input.value)
+        }
+    
+        const phoneMask = (value) => {
+          if (!value) return ""
+          value = value.replace(/\D/g, '')
+          value = value.replace(/(\d{2})(\d)/, "($1) $2")
+          value = value.replace(/(\d)(\d{4})$/, "$1-$2")
+          return value
+        }
+      </script>
+
+    <script src="main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"crossorigin="anonymous"></script>
+</body>
+</html>
